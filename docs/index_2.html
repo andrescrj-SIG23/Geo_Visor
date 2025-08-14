@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visor Colegios Puente Aranda</title>
+  <title>Visor | Colegios.geojson</title>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -11,50 +11,30 @@
     crossorigin=""
   />
   <style>
-     /* Estilos generales */
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-        } 
-        /* Estilos para el encabezado */
-        header {
-            background-color: #f6f2ef;
-            color: rgb(8, 8, 8);
-            padding: 8px 0;
-            text-align: center;
-        }
-        header img {
-            width: 200px;
-            vertical-align: middle;
-            margin-right: 3px;
-        }
-        header h1 {
-            display: inline;
-            vertical-align: middle;
-        }
     html, body { height: 100%; margin: 0; }
     #map { height: 100vh; width: 100%; }
+
+    /* 🔧 Asegura que los vectores (SVG) sean clicables en cualquier tema/CSS */
+    .leaflet-container .leaflet-interactive {
+      pointer-events: auto !important;
+      cursor: pointer;
+    }
+    /* 🔧 Garantiza que el popup quede por encima de cualquier overlay */
+    .leaflet-popup-pane { z-index: 10000 !important; }
+
     .popup-table { border-collapse: collapse; }
     .popup-table td { border-bottom: 1px solid #ddd; padding: 2px 6px; font-size: 12px; }
     .popup-table td.key { font-weight: 600; }
   </style>
 </head>
 <body>
-   <!-- Encabezado con logo y título -->
-    <header>
-        <img src="LOGO.jpg" alt="Logo">
-        <h1>Colegios Oficiales Localidad de Puente Aranda</h1>
-    </header>
-
-    <div id="map"></div>
+  <div id="map"></div>
 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
-  <!-- Librería jQuery para cargar archivo GeoJSON -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     // 1) Crear el mapa base de OpenStreetMap
     const map = L.map('map');
@@ -64,36 +44,26 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Estilo de los polígonos (relleno gris con transparencia y borde gris más oscuro)
-        var estiloPoligono = {
-            fillColor: "#D4D1C7",       // Gris claro para el relleno
-            fillOpacity: 0.35,           // Transparencia del 35%
-            color: "#505050",           // Gris más oscuro para el borde
-            weight: 1,                  // Grosor del borde
-            opacity: 1                  // Opacidad del borde
-        };
-        // Cargar el archivo GeoJSON
-        $.getJSON('poligonos_localidades_1.geojson', function(data) {
-            L.geoJSON(data, {
-                style: estiloPoligono
-            }).addTo(map);
-        });
-    // 2) Cargar el GeoJSON de puntos (asegúrate de que Colegios.geojson esté en la misma carpeta)
-    fetch('Colegios.geojson')
+    // 2) Resolver basepath para GitHub Pages (funciona si index.html está en /Geo_Visor/ o /docs/)
+    const basePath = location.pathname.replace(/[^\/]*$/, ''); // deja .../Geo_Visor/ o .../docs/
+
+    // 3) Cargar el GeoJSON (cache-buster para evitar caché CDNs)
+    fetch(`${basePath}Colegios.geojson?v=${Date.now()}`)
       .then(r => {
-        if (!r.ok) throw new Error('No se pudo cargar Colegios.geojson');
+        if (!r.ok) throw new Error(`No se pudo cargar Colegios.geojson: ${r.status}`);
         return r.json();
       })
       .then(data => {
-        // 3) Dibujar los puntos como CircleMarkers y armar popups con todos los atributos
+        // 4) Dibujar los puntos como CircleMarkers y armar popups con todos los atributos
         const colegiosLayer = L.geoJSON(data, {
           pointToLayer: (feature, latlng) => {
             return L.circleMarker(latlng, {
               radius: 6,
               weight: 1.5,
-              color: '#1f78b4', // borde
+              color: '#1f78b4',
               fillColor: '#6baed6',
-              fillOpacity: 0.8
+              fillOpacity: 0.85,
+              interactive: true // 🔧 fuerza interactividad por si algún CSS/plug-in la inhibe
             });
           },
           onEachFeature: (feature, layer) => {
@@ -102,11 +72,15 @@
               .map(([k, v]) => `<tr><td class="key">${k}</td><td>${v ?? ''}</td></tr>`) 
               .join('');
             const html = `<table class="popup-table">${rows || '<tr><td>(Sin atributos)</td></tr>'}</table>`;
-            layer.bindPopup(html);
+
+            layer.bindPopup(html, { autoPan: true, maxWidth: 300 });
+
+            // 🔧 fallback extra: abrir explícitamente con click por si algún estilo bloquea el evento
+            layer.on('click', () => layer.openPopup());
           }
         }).addTo(map);
 
-        // 4) Ajustar la vista al extent de los puntos
+        // 5) Ajustar la vista al extent de los puntos
         try {
           const bounds = colegiosLayer.getBounds();
           if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
@@ -117,10 +91,11 @@
       })
       .catch(err => {
         console.error(err);
-        // Fallback si no carga el geojson
         map.setView([4.60971, -74.08175], 11); // Bogotá
-        alert('Error cargando Colegios.geojson. Revisa la ruta o ejecuta un servidor local.');
+        alert('Error cargando Colegios.geojson. Revisa la ruta publicada en GitHub Pages.');
       });
+
+    // Nota: El GeoJSON debe estar en WGS84 (EPSG:4326). Si está en otro sistema, reproyéctalo antes.
   </script>
 </body>
 </html>

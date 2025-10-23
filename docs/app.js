@@ -1,4 +1,4 @@
-const DEPTOS_URL = 'Departamentos.geojson';
+const DEPTOS_URL = 'https://datos-geograficos-geovisor.onrender.com/Departamentos.geojson';
 const MUNICIPIOS_URL = 'Municipios.geojson';
 const COLEGIOSPAIS_URL = 'ColegiosPais.geojson';
 const RED_NACIONAL_SST = 'datos_ips.csv';

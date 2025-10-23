@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visor – Departamentos y Municipios</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="styles2.css"/>
+</head>
+<body>
+  <div class="top-bar">
+  <div class="left-logo">
+    <img src="LOGO.jpg" alt="Logo izquierdo" class="logo">
+  </div>
+
+  <div class="title">
+    RED NACIONAL DE PRESTADORES SST
+  </div>
+
+  <div class="right-logo">
+    <img src="LOGO.jpg" alt="Logo derecho" class="logo">
+  </div>
+  </div>
+
+  <header class="topbar">
+    </div>
+    <div class="topbar__group">
+    <label for="select-region">Región:</label>
+    <select id="select-region">
+    <option value="__ALL__">— Todas las regiones —</option>
+    <option value="1">Región 1</option>
+    <option value="2">Región 2</option>
+    <option value="3">Región 3</option>
+    <option value="4">Región 4</option>
+    <option value="5">Región 5</option>
+    <option value="6">Región 6</option>
+    <option value="7">Región 7</option>
+    <option value="8">Región 8</option>
+    <option value="9">Región 9</option>
+    <option value="10">Región 10</option>
+    </select>
+    </div>
+    <div class="topbar__group">
+      <label for="select-dpto">Departamento:</label>
+      <select id="select-dpto">
+        <option value="__ALL__">Colombia</option>
+      </select>
+    </div>
+    <div class="topbar__group">
+      <label for="select-etc">ETC:</label>
+      <select id="select-etc">
+        <option value="__ETC_ALL__">Ninguna</option>
+      </select>
+    </div>
+        <div id="ips-controls">
+      <label><input type="checkbox" id="toggle-emo"> Red EMO</label>
+      <label><input type="checkbox" id="toggle-ecis"> Red ECIS</label>
+      <label><input type="checkbox" id="toggle-pcl"> Red PCL</label>
+    </div>
+  </header>
+
+  <div id="map"></div>
+  <div id="legend" class="legend" aria-label="Leyenda ETC"></div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
+  <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>  <!-- Libreria para leer CSV - PapaParse -->
+  <script src="app.js"></script>
+</body>
+</html>
